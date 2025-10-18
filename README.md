@@ -1,98 +1,214 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Kamino Places API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Microservicio de lugares para Kamino - Base de datos central de puntos de interés de la ciudad.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Descripción
 
-## Description
+Este microservicio funciona como la base de datos central de puntos de interés, proporcionando un catálogo completo de lugares con funcionalidades avanzadas de búsqueda, filtrado y gestión geoespacial.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Características Principales
 
-## Project setup
+### 1. Catálogo de Lugares
+- Información detallada de cada ubicación
+- Coordenadas geográficas precisas
+- Categorización y etiquetado
+- Galería de imágenes
+- Sistema de "joyas ocultas"
 
+### 2. Búsqueda y Filtrado Avanzado
+- Búsqueda por nombre
+- Filtrado por categorías y etiquetas
+- Búsqueda por proximidad geográfica
+- Ordenamiento personalizable
+- Paginación de resultados
+
+### 3. Funcionalidades Administrativas
+- CRUD completo de lugares
+- Gestión de categorías y etiquetas
+- Toggle de "joya oculta"
+- API RESTful documentada
+
+### 4. Procesamiento Geoespacial
+- Cálculo de distancias
+- Consultas de proximidad
+- Coordenadas de alta precisión
+
+## Tecnologías Utilizadas
+
+- **Framework**: NestJS
+- **Base de Datos**: PostgreSQL
+- **ORM**: TypeORM
+- **Validación**: class-validator, class-transformer
+- **Documentación**: Swagger/OpenAPI
+- **Lenguaje**: TypeScript
+
+## Instalación
+
+1. Clonar el repositorio:
 ```bash
-$ pnpm install
+git clone <repository-url>
+cd kamino_api_places_service
 ```
 
-## Compile and run the project
-
+2. Instalar dependencias:
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm install
 ```
 
-## Run tests
-
+3. Configurar variables de entorno:
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+cp .env.example .env
+# Editar .env con tus configuraciones
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+4. Configurar base de datos PostgreSQL:
+```sql
+CREATE DATABASE kamino_places;
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Configuración
 
-## Resources
+### Variables de Entorno
 
-Check out a few resources that may come in handy when working with NestJS:
+| Variable | Descripción | Valor por Defecto |
+|----------|-------------|-------------------|
+| `DB_HOST` | Host de la base de datos | `localhost` |
+| `DB_PORT` | Puerto de PostgreSQL | `5432` |
+| `DB_USERNAME` | Usuario de la base de datos | `postgres` |
+| `DB_PASSWORD` | Contraseña de la base de datos | `password` |
+| `DB_NAME` | Nombre de la base de datos | `kamino_places` |
+| `PORT` | Puerto de la aplicación | `3000` |
+| `NODE_ENV` | Entorno de ejecución | `development` |
+| `API_PREFIX` | Prefijo de la API | `api/v1` |
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Ejecución
 
-## Support
+### Desarrollo
+```bash
+pnpm run start:dev
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Producción
+```bash
+pnpm run build
+pnpm run start:prod
+```
 
-## Stay in touch
+## Documentación de la API
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Una vez que la aplicación esté ejecutándose, puedes acceder a la documentación interactiva de Swagger en:
 
-## License
+```
+http://localhost:3000/docs
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Endpoints Principales
+
+### Lugares
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/api/v1/places` | Obtener lugares con filtros |
+| `GET` | `/api/v1/places/:id` | Obtener lugar por ID |
+| `POST` | `/api/v1/places` | Crear nuevo lugar |
+| `PATCH` | `/api/v1/places/:id` | Actualizar lugar |
+| `DELETE` | `/api/v1/places/:id` | Eliminar lugar |
+| `GET` | `/api/v1/places/nearby` | Buscar lugares cercanos |
+| `PATCH` | `/api/v1/places/:id/toggle-hidden-gem` | Toggle joya oculta |
+| `GET` | `/api/v1/places/categories` | Obtener categorías |
+| `GET` | `/api/v1/places/tags` | Obtener etiquetas |
+
+### Parámetros de Búsqueda
+
+- `search`: Búsqueda por nombre
+- `category`: Filtrar por categoría
+- `tags`: Filtrar por etiquetas (separadas por coma)
+- `latitude`, `longitude`, `radius`: Búsqueda por proximidad
+- `isHiddenGem`: Filtrar joyas ocultas
+- `sortBy`: Campo de ordenamiento
+- `sortOrder`: Orden (ASC/DESC)
+- `page`, `limit`: Paginación
+
+## Estructura del Proyecto
+
+```
+src/
+├── common/
+│   ├── filters/          # Filtros de excepción
+│   └── interceptors/     # Interceptores de respuesta
+├── config/
+│   └── database.config.ts
+├── controllers/
+│   └── places.controller.ts
+├── dto/
+│   ├── create-place.dto.ts
+│   ├── update-place.dto.ts
+│   ├── filter-places.dto.ts
+│   ├── place-response.dto.ts
+│   └── paginated-response.dto.ts
+├── entities/
+│   └── place.entity.ts
+├── places/
+│   └── places.module.ts
+├── services/
+│   └── places.service.ts
+├── app.module.ts
+└── main.ts
+```
+
+## Modelo de Datos
+
+### Entidad Place
+
+```typescript
+{
+  id: string;              // UUID único
+  name: string;            // Nombre del lugar
+  description: string;     // Descripción detallada
+  category: string;        // Categoría principal
+  tags: string[];          // Etiquetas descriptivas
+  latitude: number;        // Latitud (precisión 8 decimales)
+  longitude: number;       // Longitud (precisión 8 decimales)
+  address: string;         // Dirección completa
+  imageUrl?: string;       // URL de imagen principal
+  isHiddenGem: boolean;    // Indicador de joya oculta
+  createdAt: Date;         // Fecha de creación
+  updatedAt: Date;         // Fecha de actualización
+}
+```
+
+## Scripts Disponibles
+
+```bash
+# Desarrollo
+pnpm run start:dev
+
+# Construcción
+pnpm run build
+
+# Producción
+pnpm run start:prod
+
+# Tests
+pnpm run test
+pnpm run test:watch
+pnpm run test:cov
+
+# Linting
+pnpm run lint
+
+# Formateo
+pnpm run format
+```
+
+## Contribución
+
+1. Fork el proyecto
+2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir un Pull Request
+
+## Licencia
+
+Este proyecto está bajo la Licencia UNLICENSED.
