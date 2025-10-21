@@ -26,22 +26,26 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
       map((data) => ({
         success: true,
         statusCode: response.statusCode,
-        message: this.getSuccessMessage(request.method, request.route?.path),
+        message: this.getSuccessMessage(response.statusCode, request.method, request.route?.path),
         data,
         timestamp: new Date().toISOString(),
       })),
     );
   }
 
-  private getSuccessMessage(method: string, path: string): string {
-    const messages = {
-      GET: 'Datos obtenidos exitosamente',
-      POST: 'Recurso creado exitosamente',
-      PATCH: 'Recurso actualizado exitosamente',
-      PUT: 'Recurso actualizado exitosamente',
-      DELETE: 'Recurso eliminado exitosamente',
+  private getSuccessMessage(statusCode: number, method: string, path?: string): string {
+    const messagesByStatus: Record<number, string> = {
+      200: 'Datos obtenidos exitosamente',
+      201: 'Recurso creado exitosamente',
+      202: 'Solicitud aceptada',
+      204: 'Operación completada exitosamente',
     };
 
-    return messages[method] || 'Operación completada exitosamente';
+    // Excepciones conocidas: endpoints de búsqueda que usan POST
+    if (method === 'POST' && path && (path.includes('nearby') || path.includes('search'))) {
+      return 'Datos obtenidos exitosamente';
+    }
+
+    return messagesByStatus[statusCode] || 'Operación completada exitosamente';
   }
 }

@@ -54,8 +54,38 @@ curl -X GET "http://localhost:3000/api/v1/places?tags=vintage,tranquilo"
 
 ## 7. Buscar Lugares Cercanos
 
+### Búsqueda básica (Lima Centro)
 ```bash
-curl -X GET "http://localhost:3000/api/v1/places/nearby?latitude=-12.046374&longitude=-77.042793&radius=5&limit=10"
+curl -X POST http://localhost:3000/api/v1/places/nearby \
+  -H "Content-Type: application/json" \
+  -d '{
+    "latitude": -12.0464,
+    "longitude": -77.0428,
+    "radius": 5,
+    "limit": 10
+  }'
+```
+
+### Búsqueda con radio amplio (Miraflores)
+```bash
+curl -X POST http://localhost:3000/api/v1/places/nearby \
+  -H "Content-Type: application/json" \
+  -d '{
+    "latitude": -12.1219,
+    "longitude": -77.0297,
+    "radius": 15,
+    "limit": 20
+  }'
+```
+
+### Búsqueda mínima (solo coordenadas requeridas)
+```bash
+curl -X POST http://localhost:3000/api/v1/places/nearby \
+  -H "Content-Type: application/json" \
+  -d '{
+    "latitude": -12.046374,
+    "longitude": -77.042793
+  }'
 ```
 
 ## 8. Filtrar Solo Joyas Ocultas

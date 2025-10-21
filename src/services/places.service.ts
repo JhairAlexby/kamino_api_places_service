@@ -11,6 +11,7 @@ import { UpdatePlaceDto } from '../dto/update-place.dto';
 import { FilterPlacesDto } from '../dto/filter-places.dto';
 import { PlaceResponseDto } from '../dto/place-response.dto';
 import { PaginatedResponseDto, PaginationMetaDto } from '../dto/paginated-response.dto';
+import { NearbySearchDto } from '../dto/nearby-search.dto';
 
 @Injectable()
 export class PlacesService {
@@ -159,12 +160,35 @@ export class PlacesService {
     }
   }
 
+  // Sobrecarga para aceptar DTO
+  async findNearby(nearbySearchDto: NearbySearchDto): Promise<PlaceResponseDto[]>;
+  // Sobrecarga para mantener compatibilidad con parámetros individuales
   async findNearby(
     latitude: number,
     longitude: number,
+    radius?: number,
+    limit?: number
+  ): Promise<PlaceResponseDto[]>;
+  // Implementación
+  async findNearby(
+    latitudeOrDto: number | NearbySearchDto,
+    longitude?: number,
     radius: number = 5,
     limit: number = 10
   ): Promise<PlaceResponseDto[]> {
+    let latitude: number;
+    
+    // Determinar si se pasó un DTO o parámetros individuales
+    if (typeof latitudeOrDto === 'object') {
+      const dto = latitudeOrDto as NearbySearchDto;
+      latitude = dto.latitude;
+      longitude = dto.longitude;
+      radius = dto.radius || 5;
+      limit = dto.limit || 10;
+    } else {
+      latitude = latitudeOrDto;
+      longitude = longitude!;
+    }
     if (radius <= 0 || radius > 100) {
       throw new BadRequestException('El radio debe estar entre 0.1 y 100 kilómetros');
     }

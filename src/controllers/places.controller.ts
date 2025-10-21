@@ -19,6 +19,8 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
+  ApiExtraModels,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { PlacesService } from '../services/places.service';
 import { CreatePlaceDto } from '../dto/create-place.dto';
@@ -26,6 +28,7 @@ import { UpdatePlaceDto } from '../dto/update-place.dto';
 import { FilterPlacesDto } from '../dto/filter-places.dto';
 import { PlaceResponseDto } from '../dto/place-response.dto';
 import { PaginatedResponseDto } from '../dto/paginated-response.dto';
+import { NearbySearchDto } from '../dto/nearby-search.dto';
 
 @ApiTags('Places')
 @Controller('places')
@@ -77,36 +80,62 @@ export class PlacesController {
     return this.placesService.findAll(filterDto);
   }
 
-  @Get('nearby')
+  @Post('nearby')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Buscar lugares cercanos',
-    description: 'Encuentra lugares cercanos a coordenadas específicas',
+    description: 'Encuentra lugares cercanos a coordenadas específicas usando datos JSON',
   })
-  @ApiQuery({ name: 'latitude', required: true, description: 'Latitud de referencia' })
-  @ApiQuery({ name: 'longitude', required: true, description: 'Longitud de referencia' })
-  @ApiQuery({ name: 'radius', required: false, description: 'Radio de búsqueda en kilómetros (por defecto: 5)' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Número máximo de resultados (por defecto: 10)' })
+  @ApiBody({ 
+    type: NearbySearchDto,
+    description: 'Datos de búsqueda de lugares cercanos',
+    examples: {
+      'Lima Centro': {
+        summary: 'Búsqueda en Lima Centro',
+        value: {
+          latitude: -12.0464,
+          longitude: -77.0428,
+          radius: 5,
+          limit: 10
+        }
+      },
+      'Miraflores': {
+        summary: 'Búsqueda en Miraflores',
+        value: {
+          latitude: -12.1219,
+          longitude: -77.0297,
+          radius: 10,
+          limit: 20
+        }
+      }
+    }
+  })
+  @ApiExtraModels(PlaceResponseDto)
   @ApiResponse({
     status: 200,
-    description: 'Lugares cercanos encontrados',
-    type: [PlaceResponseDto],
+    description: 'Lugares cercanos encontrados exitosamente',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        statusCode: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Datos obtenidos exitosamente' },
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(PlaceResponseDto) }
+        },
+        timestamp: { type: 'string', example: '2024-01-15T10:30:00Z' }
+      }
+    }
   })
   @ApiResponse({
     status: 400,
-    description: 'Parámetros de coordenadas inválidos',
+    description: 'Datos de entrada inválidos o coordenadas fuera de rango',
   })
   async findNearby(
-    @Query('latitude') latitude: number,
-    @Query('longitude') longitude: number,
-    @Query('radius') radius?: number,
-    @Query('limit') limit?: number,
+    @Body() nearbySearchDto: NearbySearchDto,
   ): Promise<PlaceResponseDto[]> {
-    return this.placesService.findNearby(
-      Number(latitude),
-      Number(longitude),
-      radius ? Number(radius) : 5,
-      limit ? Number(limit) : 10,
-    );
+    return this.placesService.findNearby(nearbySearchDto);
   }
 
   @Get('categories')
