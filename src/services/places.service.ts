@@ -244,13 +244,20 @@ export class PlacesService {
   async getTags(): Promise<string[]> {
     const result = await this.placeRepository
       .createQueryBuilder('place')
-      .select('place.tags', 'tags')
+      .select(['place.id', 'place.tags'])
       .getMany();
 
     const allTags = new Set<string>();
+
     result.forEach(place => {
-      if (place.tags) {
+      if (Array.isArray(place.tags)) {
         place.tags.forEach(tag => allTags.add(tag));
+      } else if (typeof (place as any).tags === 'string') {
+        (place as any).tags
+          .split(',')
+          .map(t => t.trim())
+          .filter(Boolean)
+          .forEach(tag => allTags.add(tag));
       }
     });
 

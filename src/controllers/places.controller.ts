@@ -191,7 +191,25 @@ export class PlacesController {
     description: 'Actualiza la información de un lugar existente',
   })
   @ApiParam({ name: 'id', description: 'ID único del lugar' })
-  @ApiBody({ type: UpdatePlaceDto })
+  @ApiBody({
+    type: UpdatePlaceDto,
+    description: 'Campos opcionales para actualización del lugar',
+    examples: {
+      'Actualización básica': {
+        summary: 'Nombre y descripción',
+        value: {
+          name: 'Café Central Renovado',
+          description: 'Un acogedor café renovado en el centro de la ciudad',
+        },
+      },
+      'Marcar como joya oculta': {
+        summary: 'Solo isHiddenGem',
+        value: {
+          isHiddenGem: true,
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Lugar actualizado exitosamente',
