@@ -19,6 +19,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
+  ApiOkResponse,
   ApiExtraModels,
   getSchemaPath,
 } from '@nestjs/swagger';
@@ -29,10 +30,13 @@ import { FilterPlacesDto } from '../dto/filter-places.dto';
 import { PlaceResponseDto } from '../dto/place-response.dto';
 import { PaginatedResponseDto } from '../dto/paginated-response.dto';
 import { NearbySearchDto } from '../dto/nearby-search.dto';
+import { DeleteResponseDto } from '../dto/delete-response.dto';
 
 @ApiTags('Places')
 @Controller('places')
 @UsePipes(new ValidationPipe({ transform: true }))
+// En la clase PlacesController
+@ApiExtraModels(DeleteResponseDto)
 export class PlacesController {
   constructor(private readonly placesService: PlacesService) {}
 
@@ -249,22 +253,32 @@ export class PlacesController {
     return this.placesService.toggleHiddenGem(id);
   }
 
+  // Dentro de PlacesController.remove()
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Eliminar un lugar',
-    description: 'Elimina un lugar de la base de datos',
+    description: 'Elimina un lugar de la base de datos (borrado lógico)',
   })
   @ApiParam({ name: 'id', description: 'ID único del lugar' })
-  @ApiResponse({
-    status: 204,
+  @ApiOkResponse({
     description: 'Lugar eliminado exitosamente',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        statusCode: { type: 'integer', example: 200 },
+        message: { type: 'string', example: 'Recurso eliminado exitosamente' },
+        data: { $ref: getSchemaPath(DeleteResponseDto) },
+        timestamp: { type: 'string', format: 'date-time', example: '2024-08-29T12:34:56.000Z' },
+      },
+    },
   })
   @ApiResponse({
     status: 404,
     description: 'Lugar no encontrado',
   })
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(@Param('id') id: string): Promise<DeleteResponseDto> {
     return this.placesService.remove(id);
   }
 }

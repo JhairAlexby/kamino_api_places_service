@@ -12,6 +12,7 @@ import { FilterPlacesDto } from '../dto/filter-places.dto';
 import { PlaceResponseDto } from '../dto/place-response.dto';
 import { PaginatedResponseDto, PaginationMetaDto } from '../dto/paginated-response.dto';
 import { NearbySearchDto } from '../dto/nearby-search.dto';
+import { DeleteResponseDto } from '../dto/delete-response.dto';
 
 @Injectable()
 export class PlacesService {
@@ -42,6 +43,7 @@ export class PlacesService {
     } = filterDto;
 
     const queryBuilder = this.placeRepository.createQueryBuilder('place');
+    queryBuilder.where('place.deletedAt IS NULL');
 
     // Búsqueda por nombre
     if (search) {
@@ -135,7 +137,11 @@ export class PlacesService {
   }
 
   async findOne(id: string): Promise<PlaceResponseDto> {
-    const place = await this.placeRepository.findOne({ where: { id } });
+    const place = await this.placeRepository
+      .createQueryBuilder('place')
+      .where('place.id = :id', { id })
+      .andWhere('place.deletedAt IS NULL')
+      .getOne();
     if (!place) {
       throw new NotFoundException(`Lugar con ID ${id} no encontrado`);
     }
@@ -153,11 +159,13 @@ export class PlacesService {
     return new PlaceResponseDto(updatedPlace);
   }
 
-  async remove(id: string): Promise<void> {
-    const result = await this.placeRepository.delete(id);
-    if (result.affected === 0) {
+  async remove(id: string): Promise<DeleteResponseDto> {
+    const exists = await this.placeRepository.findOne({ where: { id } });
+    if (!exists) {
       throw new NotFoundException(`Lugar con ID ${id} no encontrado`);
     }
+    await this.placeRepository.softDelete(id);
+    return { id, deleted: true };
   }
 
   // Sobrecarga para aceptar DTO
@@ -204,6 +212,7 @@ export class PlacesService {
         `(6371 * acos(cos(radians(:latitude)) * cos(radians(place.latitude)) * cos(radians(place.longitude) - radians(:longitude)) + sin(radians(:latitude)) * sin(radians(place.latitude)))) <= :radius`,
         { radius }
       )
+      .andWhere('place.deletedAt IS NULL')
       .orderBy('distance', 'ASC')
       .limit(limit);
 
@@ -235,6 +244,7 @@ export class PlacesService {
     const result = await this.placeRepository
       .createQueryBuilder('place')
       .select('DISTINCT place.category', 'category')
+      .where('place.deletedAt IS NULL')
       .orderBy('place.category', 'ASC')
       .getRawMany();
 
@@ -245,10 +255,10 @@ export class PlacesService {
     const result = await this.placeRepository
       .createQueryBuilder('place')
       .select(['place.id', 'place.tags'])
+      .where('place.deletedAt IS NULL')
       .getMany();
 
     const allTags = new Set<string>();
-
     result.forEach(place => {
       if (Array.isArray(place.tags)) {
         place.tags.forEach(tag => allTags.add(tag));

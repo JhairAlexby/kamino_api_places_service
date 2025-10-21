@@ -41,9 +41,11 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
       204: 'Operación completada exitosamente',
     };
 
-    // Excepciones conocidas: endpoints de búsqueda que usan POST
     if (method === 'POST' && path && (path.includes('nearby') || path.includes('search'))) {
       return 'Datos obtenidos exitosamente';
+    }
+    if (method === 'DELETE') {
+      return 'Recurso eliminado exitosamente';
     }
 
     return messagesByStatus[statusCode] || 'Operación completada exitosamente';
