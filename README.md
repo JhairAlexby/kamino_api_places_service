@@ -13,7 +13,7 @@ Este microservicio funciona como la base de datos central de puntos de interés,
 - Coordenadas geográficas precisas
 - Categorización y etiquetado
 - Galería de imágenes
-- Sistema de "joyas ocultas"
+- Sistema de "joyas ocultas".
 
 ### 2. Búsqueda y Filtrado Avanzado
 - Búsqueda por nombre
