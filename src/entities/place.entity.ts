@@ -43,6 +43,15 @@ export class Place {
   @Column({ type: 'boolean', default: false })
   isHiddenGem: boolean;
 
+  @Column({ type: 'time', nullable: true })
+  openingTime?: string;
+
+  @Column({ type: 'time', nullable: true })
+  closingTime?: string;
+
+  @Column({ type: 'integer', nullable: true })
+  tourDuration?: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
