@@ -65,6 +65,27 @@ export class PlaceResponseDto {
   isHiddenGem: boolean;
 
   @ApiProperty({
+    description: 'Hora de apertura del lugar (HH:mm:ss)',
+    example: '08:30:00',
+    nullable: true,
+  })
+  openingTime: string | null;
+
+  @ApiProperty({
+    description: 'Hora de cierre del lugar (HH:mm:ss)',
+    example: '18:00:00',
+    nullable: true,
+  })
+  closingTime: string | null;
+
+  @ApiProperty({
+    description: 'Duración estimada del recorrido en minutos',
+    example: 90,
+    nullable: true,
+  })
+  tourDuration: number | null;
+
+  @ApiProperty({
     description: 'Fecha de creación',
     example: '2024-01-15T10:30:00Z',
   })
@@ -94,6 +115,9 @@ export class PlaceResponseDto {
     this.address = place.address;
     this.imageUrl = place.imageUrl;
     this.isHiddenGem = place.isHiddenGem;
+    this.openingTime = place.openingTime ?? null;
+    this.closingTime = place.closingTime ?? null;
+    this.tourDuration = place.tourDuration ?? null;
     this.createdAt = place.createdAt;
     this.updatedAt = place.updatedAt;
     if (distance !== undefined) {

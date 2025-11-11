@@ -22,6 +22,23 @@ export class PlacesService {
   ) {}
 
   async create(createPlaceDto: CreatePlaceDto): Promise<PlaceResponseDto> {
+    // Validación de horarios: closingTime debe ser posterior a openingTime
+    if (createPlaceDto.openingTime && createPlaceDto.closingTime) {
+      const openSec = this.timeToSeconds(createPlaceDto.openingTime);
+      const closeSec = this.timeToSeconds(createPlaceDto.closingTime);
+      if (openSec === null || closeSec === null) {
+        throw new BadRequestException('Formato de tiempo inválido. Use HH:mm o HH:mm:ss');
+      }
+      if (closeSec <= openSec) {
+        throw new BadRequestException('closingTime debe ser posterior a openingTime');
+      }
+    }
+
+    // tourDuration es validado por DTO, pero reforzamos que si existe sea positivo
+    if (createPlaceDto.tourDuration !== undefined && createPlaceDto.tourDuration! <= 0) {
+      throw new BadRequestException('tourDuration debe ser un número entero positivo');
+    }
+
     const place = this.placeRepository.create(createPlaceDto);
     const savedPlace = await this.placeRepository.save(place);
     return new PlaceResponseDto(savedPlace);
@@ -152,6 +169,24 @@ export class PlacesService {
     const place = await this.placeRepository.findOne({ where: { id } });
     if (!place) {
       throw new NotFoundException(`Lugar con ID ${id} no encontrado`);
+    }
+
+    // Validación de horarios considerando valores existentes
+    const openingCandidate = updatePlaceDto.openingTime ?? place.openingTime ?? undefined;
+    const closingCandidate = updatePlaceDto.closingTime ?? place.closingTime ?? undefined;
+    if (openingCandidate && closingCandidate) {
+      const openSec = this.timeToSeconds(openingCandidate);
+      const closeSec = this.timeToSeconds(closingCandidate);
+      if (openSec === null || closeSec === null) {
+        throw new BadRequestException('Formato de tiempo inválido. Use HH:mm o HH:mm:ss');
+      }
+      if (closeSec <= openSec) {
+        throw new BadRequestException('closingTime debe ser posterior a openingTime');
+      }
+    }
+
+    if (updatePlaceDto.tourDuration !== undefined && updatePlaceDto.tourDuration! <= 0) {
+      throw new BadRequestException('tourDuration debe ser un número entero positivo');
     }
 
     Object.assign(place, updatePlaceDto);
@@ -296,5 +331,15 @@ export class PlacesService {
 
   private deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
+  }
+
+  private timeToSeconds(time: string): number | null {
+    // Acepta HH:mm o HH:mm:ss
+    const match = time.match(/^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/);
+    if (!match) return null;
+    const h = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const s = match[3] ? parseInt(match[3], 10) : 0;
+    return h * 3600 + m * 60 + s;
   }
 }

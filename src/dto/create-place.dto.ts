@@ -7,9 +7,11 @@ import {
   IsArray,
   IsBoolean,
   IsUrl,
+  IsInt,
   Min,
   Max,
   MaxLength,
+  Matches,
 } from 'class-validator';
 
 export class CreatePlaceDto {
@@ -100,4 +102,40 @@ export class CreatePlaceDto {
   @IsOptional()
   @IsBoolean()
   isHiddenGem?: boolean = false;
+
+  @ApiProperty({
+    description: 'Hora de apertura en formato HH:mm o HH:mm:ss',
+    example: '08:30',
+    required: false,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/, {
+    message: 'openingTime debe estar en formato HH:mm o HH:mm:ss',
+  })
+  openingTime?: string;
+
+  @ApiProperty({
+    description: 'Hora de cierre en formato HH:mm o HH:mm:ss (debe ser posterior a openingTime)',
+    example: '18:00',
+    required: false,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/, {
+    message: 'closingTime debe estar en formato HH:mm o HH:mm:ss',
+  })
+  closingTime?: string;
+
+  @ApiProperty({
+    description: 'Duración estimada del recorrido en minutos (entero positivo)',
+    example: 90,
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1, { message: 'tourDuration debe ser un número entero positivo' })
+  tourDuration?: number;
 }
