@@ -77,6 +77,27 @@ export class PlaceResponseDto {
   updatedAt: Date;
 
   @ApiProperty({
+    description: 'Hora de apertura del lugar',
+    example: '08:00:00',
+    nullable: true,
+  })
+  openingTime: string | null;
+
+  @ApiProperty({
+    description: 'Hora de cierre del lugar',
+    example: '22:00:00',
+    nullable: true,
+  })
+  closingTime: string | null;
+
+  @ApiProperty({
+    description: 'Duración estimada del tour en minutos',
+    example: 120,
+    nullable: true,
+  })
+  tourDuration: number | null;
+
+  @ApiProperty({
     description: 'Distancia en kilómetros (solo en búsquedas por proximidad)',
     example: 2.5,
     required: false,
@@ -96,6 +117,9 @@ export class PlaceResponseDto {
     this.isHiddenGem = place.isHiddenGem;
     this.createdAt = place.createdAt;
     this.updatedAt = place.updatedAt;
+    this.openingTime = place.openingTime;
+    this.closingTime = place.closingTime;
+    this.tourDuration = place.tourDuration;
     if (distance !== undefined) {
       this.distance = Math.round(distance * 100) / 100; // Redondear a 2 decimales
     }

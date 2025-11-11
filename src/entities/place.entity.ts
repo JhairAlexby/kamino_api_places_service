@@ -49,6 +49,15 @@ export class Place {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Column({ type: 'time', nullable: true })
+  openingTime: string;
+
+  @Column({ type: 'time', nullable: true })
+  closingTime: string;
+
+  @Column({ type: 'int', nullable: true })
+  tourDuration: number;
+
   @DeleteDateColumn()
   deletedAt: Date;
 }

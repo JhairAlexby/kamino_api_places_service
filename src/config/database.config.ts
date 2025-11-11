@@ -12,6 +12,8 @@ export default registerAs(
     password: process.env.DB_PASSWORD || 'password',
     database: process.env.DB_NAME || 'kamino_places',
     entities: [Place],
+    migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+    migrationsRun: false,
     synchronize: process.env.NODE_ENV === 'development',
     logging: process.env.NODE_ENV === 'development',
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
