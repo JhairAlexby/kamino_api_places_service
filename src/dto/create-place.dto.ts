@@ -100,4 +100,34 @@ export class CreatePlaceDto {
   @IsOptional()
   @IsBoolean()
   isHiddenGem?: boolean = false;
+
+  @ApiProperty({
+    description: 'Hora de apertura del lugar (formato HH:MM)',
+    example: '09:00',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  openingTime?: string;
+
+  @ApiProperty({
+    description: 'Hora de cierre del lugar (formato HH:MM)',
+    example: '18:00',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  closingTime?: string;
+
+  @ApiProperty({
+    description: 'Duración estimada del recorrido en minutos',
+    example: 120,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  tourDuration?: number;
 }
