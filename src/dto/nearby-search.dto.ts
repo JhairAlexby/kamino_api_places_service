@@ -56,4 +56,44 @@ export class NearbySearchDto {
   @Max(100, { message: 'El límite máximo es 100' })
   @Type(() => Number)
   limit?: number = 10;
+
+  @ApiProperty({
+    description: 'Filtrar por hora de apertura (formato HH:MM:SS)',
+    example: '09:00:00',
+    required: false,
+  })
+  @IsOptional()
+  openingTime?: string;
+
+  @ApiProperty({
+    description: 'Filtrar por hora de cierre (formato HH:MM:SS)',
+    example: '18:00:00',
+    required: false,
+  })
+  @IsOptional()
+  closingTime?: string;
+
+  @ApiProperty({
+    description: 'Duración mínima de tour en minutos',
+    example: 60,
+    required: false,
+    minimum: 1,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'La duración mínima debe ser un número válido' })
+  @Min(1, { message: 'La duración mínima debe ser al menos 1 minuto' })
+  @Type(() => Number)
+  minTourDuration?: number;
+
+  @ApiProperty({
+    description: 'Duración máxima de tour en minutos',
+    example: 240,
+    required: false,
+    minimum: 1,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'La duración máxima debe ser un número válido' })
+  @Min(1, { message: 'La duración máxima debe ser al menos 1 minuto' })
+  @Type(() => Number)
+  maxTourDuration?: number;
 }

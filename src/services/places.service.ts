@@ -36,6 +36,10 @@ export class PlacesService {
       longitude,
       radius,
       isHiddenGem,
+      openingTime,
+      closingTime,
+      minTourDuration,
+      maxTourDuration,
       sortBy = 'createdAt',
       sortOrder = 'DESC',
       page = 1,
@@ -75,6 +79,34 @@ export class PlacesService {
       });
     }
 
+    // Filtro por horario de apertura
+    if (openingTime) {
+      queryBuilder.andWhere('place.openingTime = :openingTime', {
+        openingTime,
+      });
+    }
+
+    // Filtro por horario de cierre
+    if (closingTime) {
+      queryBuilder.andWhere('place.closingTime = :closingTime', {
+        closingTime,
+      });
+    }
+
+    // Filtro por duración mínima de tour
+    if (minTourDuration !== undefined) {
+      queryBuilder.andWhere('place.tourDuration >= :minTourDuration', {
+        minTourDuration,
+      });
+    }
+
+    // Filtro por duración máxima de tour
+    if (maxTourDuration !== undefined) {
+      queryBuilder.andWhere('place.tourDuration <= :maxTourDuration', {
+        maxTourDuration,
+      });
+    }
+
     // Búsqueda por proximidad
     let hasProximitySearch = false;
     if (latitude !== undefined && longitude !== undefined && radius !== undefined) {
@@ -94,7 +126,7 @@ export class PlacesService {
     if (sortBy === 'distance' && hasProximitySearch) {
       queryBuilder.orderBy('distance', sortOrder);
     } else {
-      const validSortFields = ['name', 'category', 'createdAt'];
+      const validSortFields = ['name', 'category', 'createdAt', 'openingTime', 'closingTime', 'tourDuration'];
       const sortField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
       queryBuilder.orderBy(`place.${sortField}`, sortOrder);
     }
@@ -185,6 +217,10 @@ export class PlacesService {
     limit: number = 10
   ): Promise<PlaceResponseDto[]> {
     let latitude: number;
+    let openingTime: string | undefined;
+    let closingTime: string | undefined;
+    let minTourDuration: number | undefined;
+    let maxTourDuration: number | undefined;
     
     // Determinar si se pasó un DTO o parámetros individuales
     if (typeof latitudeOrDto === 'object') {
@@ -193,6 +229,10 @@ export class PlacesService {
       longitude = dto.longitude;
       radius = dto.radius || 5;
       limit = dto.limit || 10;
+      openingTime = dto.openingTime;
+      closingTime = dto.closingTime;
+      minTourDuration = dto.minTourDuration;
+      maxTourDuration = dto.maxTourDuration;
     } else {
       latitude = latitudeOrDto;
       longitude = longitude!;
@@ -212,7 +252,26 @@ export class PlacesService {
         `(6371 * acos(cos(radians(:latitude)) * cos(radians(place.latitude)) * cos(radians(place.longitude) - radians(:longitude)) + sin(radians(:latitude)) * sin(radians(place.latitude)))) <= :radius`,
         { radius }
       )
-      .andWhere('place.deletedAt IS NULL')
+      .andWhere('place.deletedAt IS NULL');
+
+    // Filtros adicionales para búsqueda cercana
+    if (openingTime) {
+      queryBuilder.andWhere('place.openingTime = :openingTime', { openingTime });
+    }
+
+    if (closingTime) {
+      queryBuilder.andWhere('place.closingTime = :closingTime', { closingTime });
+    }
+
+    if (minTourDuration !== undefined) {
+      queryBuilder.andWhere('place.tourDuration >= :minTourDuration', { minTourDuration });
+    }
+
+    if (maxTourDuration !== undefined) {
+      queryBuilder.andWhere('place.tourDuration <= :maxTourDuration', { maxTourDuration });
+    }
+
+    queryBuilder
       .orderBy('distance', 'ASC')
       .limit(limit);
 
@@ -272,6 +331,66 @@ export class PlacesService {
     });
 
     return Array.from(allTags).sort();
+  }
+
+  async getAvailableNow(filters: {
+    category?: string;
+    radius?: number;
+    latitude?: number;
+    longitude?: number;
+    limit?: number;
+  }): Promise<PlaceResponseDto[]> {
+    const { category, radius, latitude, longitude, limit = 20 } = filters;
+    
+    // Obtener hora actual en formato HH:MM:SS
+    const now = new Date();
+    const currentTime = now.toTimeString().slice(0, 8); // HH:MM:SS
+
+    const queryBuilder = this.placeRepository
+      .createQueryBuilder('place')
+      .where('place.deletedAt IS NULL')
+      .andWhere('place.openingTime IS NOT NULL')
+      .andWhere('place.closingTime IS NOT NULL')
+      .andWhere(':currentTime >= place.openingTime', { currentTime })
+      .andWhere(':currentTime <= place.closingTime', { currentTime })
+      .orderBy('place.name', 'ASC')
+      .limit(limit);
+
+    // Filtro por categoría
+    if (category) {
+      queryBuilder.andWhere('LOWER(place.category) = LOWER(:category)', {
+        category,
+      });
+    }
+
+    // Filtro por proximidad
+    if (latitude !== undefined && longitude !== undefined && radius !== undefined) {
+      queryBuilder.addSelect(
+        `(6371 * acos(cos(radians(:latitude)) * cos(radians(place.latitude)) * cos(radians(place.longitude) - radians(:longitude)) + sin(radians(:latitude)) * sin(radians(place.latitude))))`,
+        'distance'
+      );
+      queryBuilder.setParameters({ latitude, longitude });
+      queryBuilder.andWhere(
+        `(6371 * acos(cos(radians(:latitude)) * cos(radians(place.latitude)) * cos(radians(place.longitude) - radians(:longitude)) + sin(radians(:latitude)) * sin(radians(place.latitude)))) <= :radius`,
+        { radius }
+      );
+      queryBuilder.orderBy('distance', 'ASC');
+    }
+
+    const places = await queryBuilder.getMany();
+
+    return places.map((place) => {
+      let distance: number | undefined;
+      if (latitude !== undefined && longitude !== undefined) {
+        distance = this.calculateDistance(
+          latitude,
+          longitude,
+          Number(place.latitude),
+          Number(place.longitude)
+        );
+      }
+      return new PlaceResponseDto(place, distance);
+    });
   }
 
   private calculateDistance(

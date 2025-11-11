@@ -104,14 +104,56 @@ export class FilterPlacesDto {
   isHiddenGem?: boolean;
 
   @ApiProperty({
-    description: 'Campo por el cual ordenar los resultados',
-    example: 'name',
+    description: 'Filtrar por hora de apertura (formato HH:MM:SS)',
+    example: '09:00:00',
     required: false,
-    enum: ['name', 'category', 'createdAt', 'distance'],
   })
   @IsOptional()
   @IsString()
-  @IsIn(['name', 'category', 'createdAt', 'distance'])
+  openingTime?: string;
+
+  @ApiProperty({
+    description: 'Filtrar por hora de cierre (formato HH:MM:SS)',
+    example: '18:00:00',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  closingTime?: string;
+
+  @ApiProperty({
+    description: 'Duración mínima de tour en minutos',
+    example: 60,
+    required: false,
+    minimum: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  minTourDuration?: number;
+
+  @ApiProperty({
+    description: 'Duración máxima de tour en minutos',
+    example: 240,
+    required: false,
+    minimum: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  maxTourDuration?: number;
+
+  @ApiProperty({
+    description: 'Campo por el cual ordenar los resultados',
+    example: 'name',
+    required: false,
+    enum: ['name', 'category', 'createdAt', 'distance', 'openingTime', 'closingTime', 'tourDuration'],
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['name', 'category', 'createdAt', 'distance', 'openingTime', 'closingTime', 'tourDuration'])
   sortBy?: string;
 
   @ApiProperty({
