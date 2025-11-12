@@ -12,7 +12,10 @@ export default registerAs(
     password: process.env.DB_PASSWORD || 'password',
     database: process.env.DB_NAME || 'kamino_places',
     entities: [Place],
-    migrations: ['dist/migrations/*.js', 'src/migrations/*.ts'],
+    migrations:
+      process.env.NODE_ENV === 'development'
+        ? ['src/migrations/*.ts']
+        : ['dist/migrations/*.js'],
     migrationsRun: true,
     synchronize: process.env.NODE_ENV === 'development',
     logging: process.env.NODE_ENV === 'development',
