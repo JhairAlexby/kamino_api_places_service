@@ -45,11 +45,68 @@ export class PlacesController {
     summary: 'Crear un nuevo lugar',
     description: 'Registra un nuevo punto de interés en la base de datos',
   })
-  @ApiBody({ type: CreatePlaceDto })
+  @ApiBody({
+    type: CreatePlaceDto,
+    description: 'Datos de creación del lugar',
+    examples: {
+      Basico: {
+        summary: 'Solo campos básicos',
+        value: {
+          name: 'Café Central',
+          description: 'Un acogedor café en el centro de la ciudad',
+          category: 'cafetería',
+          tags: ['vintage', 'tranquilo'],
+          latitude: -12.046374,
+          longitude: -77.042793,
+          address: 'Av. Larco 123, Miraflores, Lima',
+          imageUrl: 'https://example.com/images/cafe.jpg',
+          isHiddenGem: false
+        }
+      },
+      ConHorarioYTour: {
+        summary: 'Incluye horario y duración de tour',
+        value: {
+          name: 'Museo de Historia',
+          description: 'Exhibiciones de historia local',
+          category: 'museo',
+          tags: ['educativo', 'familiar'],
+          latitude: -12.046374,
+          longitude: -77.042793,
+          address: 'Av. Principal 123',
+          imageUrl: 'https://example.com/museo.jpg',
+          isHiddenGem: false,
+          openingTime: '09:00',
+          closingTime: '18:00',
+          tourDuration: 90
+        }
+      }
+    }
+  })
   @ApiResponse({
     status: 201,
     description: 'Lugar creado exitosamente',
     type: PlaceResponseDto,
+    content: {
+      'application/json': {
+        example: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          name: 'Museo de Historia',
+          description: 'Exhibiciones de historia local',
+          category: 'museo',
+          tags: ['educativo', 'familiar'],
+          latitude: -12.046374,
+          longitude: -77.042793,
+          address: 'Av. Principal 123',
+          imageUrl: 'https://example.com/museo.jpg',
+          isHiddenGem: false,
+          openingTime: '09:00',
+          closingTime: '18:00',
+          tourDuration: 90,
+          createdAt: '2024-01-15T10:30:00Z',
+          updatedAt: '2024-01-15T10:30:00Z'
+        }
+      }
+    }
   })
   @ApiResponse({
     status: 400,
@@ -79,6 +136,39 @@ export class PlacesController {
     status: 200,
     description: 'Lista de lugares obtenida exitosamente',
     type: PaginatedResponseDto,
+    content: {
+      'application/json': {
+        example: {
+          data: [
+            {
+              id: '11111111-1111-1111-1111-111111111111',
+              name: 'Café Central',
+              description: 'Un acogedor café en el centro de la ciudad',
+              category: 'cafetería',
+              tags: ['vintage', 'tranquilo'],
+              latitude: -12.046374,
+              longitude: -77.042793,
+              address: 'Av. Larco 123, Miraflores, Lima',
+              imageUrl: 'https://example.com/images/cafe.jpg',
+              isHiddenGem: false,
+              openingTime: '08:30',
+              closingTime: '21:00',
+              tourDuration: 60,
+              createdAt: '2024-01-15T10:30:00Z',
+              updatedAt: '2024-01-15T10:30:00Z'
+            }
+          ],
+          meta: {
+            page: 1,
+            limit: 10,
+            total: 1,
+            totalPages: 1,
+            hasPrevious: false,
+            hasNext: false
+          }
+        }
+      }
+    }
   })
   async findAll(@Query() filterDto: FilterPlacesDto): Promise<PaginatedResponseDto<PlaceResponseDto>> {
     return this.placesService.findAll(filterDto);
@@ -151,6 +241,11 @@ export class PlacesController {
     status: 200,
     description: 'Lista de categorías obtenida exitosamente',
     type: [String],
+    content: {
+      'application/json': {
+        example: ['cafetería', 'museo', 'parque']
+      }
+    }
   })
   async getCategories(): Promise<string[]> {
     return this.placesService.getCategories();
@@ -165,6 +260,11 @@ export class PlacesController {
     status: 200,
     description: 'Lista de etiquetas obtenida exitosamente',
     type: [String],
+    content: {
+      'application/json': {
+        example: ['vintage', 'tranquilo', 'familiar', 'educativo']
+      }
+    }
   })
   async getTags(): Promise<string[]> {
     return this.placesService.getTags();
@@ -180,6 +280,27 @@ export class PlacesController {
     status: 200,
     description: 'Lugar encontrado exitosamente',
     type: PlaceResponseDto,
+    content: {
+      'application/json': {
+        example: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          name: 'Museo de Historia',
+          description: 'Exhibiciones de historia local',
+          category: 'museo',
+          tags: ['educativo', 'familiar'],
+          latitude: -12.046374,
+          longitude: -77.042793,
+          address: 'Av. Principal 123',
+          imageUrl: 'https://example.com/museo.jpg',
+          isHiddenGem: false,
+          openingTime: '09:00',
+          closingTime: '18:00',
+          tourDuration: 90,
+          createdAt: '2024-01-15T10:30:00Z',
+          updatedAt: '2024-01-15T10:30:00Z'
+        }
+      }
+    }
   })
   @ApiResponse({
     status: 404,
@@ -212,12 +333,41 @@ export class PlacesController {
           isHiddenGem: true,
         },
       },
+      'Actualizar horario y tour': {
+        summary: 'Modificar openingTime, closingTime y tourDuration',
+        value: {
+          openingTime: '10:00',
+          closingTime: '19:30',
+          tourDuration: 75
+        },
+      },
     },
   })
   @ApiResponse({
     status: 200,
     description: 'Lugar actualizado exitosamente',
     type: PlaceResponseDto,
+    content: {
+      'application/json': {
+        example: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          name: 'Museo de Historia',
+          description: 'Exhibiciones de historia local',
+          category: 'museo',
+          tags: ['educativo', 'familiar'],
+          latitude: -12.046374,
+          longitude: -77.042793,
+          address: 'Av. Principal 123',
+          imageUrl: 'https://example.com/museo.jpg',
+          isHiddenGem: true,
+          openingTime: '10:00',
+          closingTime: '19:30',
+          tourDuration: 75,
+          createdAt: '2024-01-15T10:30:00Z',
+          updatedAt: '2024-01-16T09:00:00Z'
+        }
+      }
+    }
   })
   @ApiResponse({
     status: 404,
