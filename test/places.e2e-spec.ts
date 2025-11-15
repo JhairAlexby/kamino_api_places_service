@@ -37,7 +37,20 @@ describe('PlacesController (e2e with mocked service)', () => {
   const tags = ['vintage', 'tranquilo', 'familiar', 'educativo'];
 
   const mockService: Partial<PlacesService> = {
-    create: async (dto: CreatePlaceDto) => ({ ...basePlace, ...dto }),
+    create: async (dto: CreatePlaceDto) => {
+      let latitude = dto.latitude ?? basePlace.latitude;
+      let longitude = dto.longitude ?? basePlace.longitude;
+      const anyDto: any = dto as any;
+      if (anyDto.coordinates) {
+        const m = (anyDto.coordinates as string).match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+        if (m) {
+          latitude = parseFloat(m[1]);
+          longitude = parseFloat(m[2]);
+        }
+      }
+      const { coordinates, ...rest } = anyDto;
+      return { ...basePlace, ...rest, latitude, longitude };
+    },
     findAll: async (filter: FilterPlacesDto) =>
       new PaginatedResponseDto<PlaceResponseDto>([basePlace], {
         page: filter.page ?? 1,
@@ -99,6 +112,28 @@ describe('PlacesController (e2e with mocked service)', () => {
     expect(res.body.openingTime).toBe('09:00');
     expect(res.body.closingTime).toBe('18:00');
     expect(res.body.tourDuration).toBe(90);
+  });
+
+  it('POST /api/v1/places acepta coordinates "lat,long"', async () => {
+    const payload: any = {
+      name: 'Mirador del Sol',
+      description: 'Vista panorámica para fotos',
+      category: 'mirador',
+      tags: ['instagrameable'],
+      coordinates: '16.614497, -93.091983',
+      address: 'Camino al mirador s/n',
+      imageUrl: 'https://example.com/mirador.jpg',
+      isHiddenGem: true,
+    };
+
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/places')
+      .send(payload)
+      .expect(201);
+
+    expect(res.body.latitude).toBeCloseTo(16.614497, 6);
+    expect(res.body.longitude).toBeCloseTo(-93.091983, 6);
+    expect(res.body.name).toBe('Mirador del Sol');
   });
 
   it('GET /api/v1/places retorna paginado y contiene nuevos campos', async () => {

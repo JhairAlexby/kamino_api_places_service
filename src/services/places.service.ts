@@ -22,6 +22,20 @@ export class PlacesService {
   ) {}
 
   async create(createPlaceDto: CreatePlaceDto): Promise<PlaceResponseDto> {
+    if (createPlaceDto.coordinates) {
+      const { latitude, longitude } = this.parseCoordinates(createPlaceDto.coordinates);
+      createPlaceDto.latitude = latitude;
+      createPlaceDto.longitude = longitude;
+      delete (createPlaceDto as any).coordinates;
+    }
+    if (
+      createPlaceDto.latitude === undefined ||
+      createPlaceDto.longitude === undefined
+    ) {
+      throw new BadRequestException(
+        'Debe especificar latitude y longitude o el campo coordinates'
+      );
+    }
     const place = this.placeRepository.create(createPlaceDto);
     const savedPlace = await this.placeRepository.save(place);
     return new PlaceResponseDto(savedPlace);
@@ -152,6 +166,13 @@ export class PlacesService {
     const place = await this.placeRepository.findOne({ where: { id } });
     if (!place) {
       throw new NotFoundException(`Lugar con ID ${id} no encontrado`);
+    }
+
+    if ((updatePlaceDto as any).coordinates) {
+      const { latitude, longitude } = this.parseCoordinates((updatePlaceDto as any).coordinates);
+      updatePlaceDto.latitude = latitude;
+      updatePlaceDto.longitude = longitude;
+      delete (updatePlaceDto as any).coordinates;
     }
 
     Object.assign(place, updatePlaceDto);
@@ -296,5 +317,21 @@ export class PlacesService {
 
   private deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
+  }
+
+  private parseCoordinates(coordinates: string): { latitude: number; longitude: number } {
+    const match = coordinates.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if (!match) {
+      throw new BadRequestException('coordinates inválidas. Use "latitud, longitud"');
+    }
+    const latitude = parseFloat(match[1]);
+    const longitude = parseFloat(match[2]);
+    if (latitude < -90 || latitude > 90) {
+      throw new BadRequestException('Latitud fuera de rango (-90 a 90)');
+    }
+    if (longitude < -180 || longitude > 180) {
+      throw new BadRequestException('Longitud fuera de rango (-180 a 180)');
+    }
+    return { latitude, longitude };
   }
 }

@@ -63,6 +63,19 @@ export class PlacesController {
           isHiddenGem: false
         }
       },
+      ConCoordenadas: {
+        summary: 'Usando campo coordinates',
+        value: {
+          name: 'Mirador del Sol',
+          description: 'Vista panorámica para fotos',
+          category: 'mirador',
+          tags: ['instagrameable'],
+          coordinates: '16.614497, -93.091983',
+          address: 'Camino al mirador s/n',
+          imageUrl: 'https://example.com/mirador.jpg',
+          isHiddenGem: true
+        }
+      },
       ConHorarioYTour: {
         summary: 'Incluye horario y duración de tour',
         value: {
