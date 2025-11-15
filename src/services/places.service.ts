@@ -252,6 +252,15 @@ export class PlacesService {
     return { id, deleted: true };
   }
 
+  async completeDeleteAll(): Promise<{ deletedCount: number }> {
+    const result = await this.placeRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Place)
+      .execute();
+    return { deletedCount: result.affected ?? 0 };
+  }
+
   // Sobrecarga para aceptar DTO
   async findNearby(nearbySearchDto: NearbySearchDto): Promise<PlaceResponseDto[]>;
   // Sobrecarga para mantener compatibilidad con parámetros individuales

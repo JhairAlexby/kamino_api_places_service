@@ -11,6 +11,7 @@ import {
   UsePipes,
   HttpCode,
   HttpStatus,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -516,5 +517,41 @@ export class PlacesController {
   })
   async remove(@Param('id') id: string): Promise<DeleteResponseDto> {
     return this.placesService.remove(id);
+  }
+
+  @Delete('admin/complete-delete-all')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Eliminar TODOS los lugares (ADMIN TEMPORAL)',
+    description:
+      'Elimina físicamente todos los registros de lugares en la base de datos. Disponible temporalmente y debe habilitarse con la variable de entorno `ALLOW_ADMIN_DELETE_ALL=true`. No permitida en producción.',
+  })
+  @ApiOkResponse({
+    description: 'Todos los lugares eliminados exitosamente',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        statusCode: { type: 'integer', example: 200 },
+        message: { type: 'string', example: 'Recurso eliminado exitosamente' },
+        data: {
+          type: 'object',
+          properties: {
+            deletedCount: { type: 'integer', example: 42 },
+          },
+        },
+        timestamp: { type: 'string', format: 'date-time', example: '2024-08-29T12:34:56.000Z' },
+      },
+    },
+  })
+  @ApiResponse({ status: 403, description: 'Operación no permitida' })
+  async adminCompleteDeleteAll(): Promise<{ deletedCount: number }> {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('Operación no permitida en producción');
+    }
+    if (process.env.ALLOW_ADMIN_DELETE_ALL !== 'true') {
+      throw new ForbiddenException('Operación no habilitada');
+    }
+    return this.placesService.completeDeleteAll();
   }
 }

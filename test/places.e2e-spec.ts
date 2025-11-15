@@ -54,9 +54,11 @@ describe('PlacesController (e2e with mocked service)', () => {
     findNearby: async (dto: NearbySearchDto) => [{ ...basePlace, distance: 2.5 }],
     getCategories: async () => categories,
     getTags: async () => tags,
+    completeDeleteAll: async () => ({ deletedCount: 42 }),
   };
 
   beforeAll(async () => {
+    process.env.ALLOW_ADMIN_DELETE_ALL = 'true';
     const moduleRef: TestingModule = await Test.createTestingModule({
       controllers: [PlacesController],
       providers: [
@@ -194,5 +196,12 @@ describe('PlacesController (e2e with mocked service)', () => {
       .delete(`/api/v1/places/${id}`)
       .expect(200);
     expect(res.body).toEqual<DeleteResponseDto>({ id, deleted: true });
+  });
+
+  it('DELETE /api/v1/places/admin/complete-delete-all elimina todos los lugares', async () => {
+    const res = await request(app.getHttpServer())
+      .delete('/api/v1/places/admin/complete-delete-all')
+      .expect(200);
+    expect(res.body).toEqual({ deletedCount: 42 });
   });
 });
