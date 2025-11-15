@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Place } from '../entities/place.entity';
 import { CreatePlaceDto } from '../dto/create-place.dto';
+import { CreatePlacesBulkDto } from '../dto/create-places-bulk.dto';
 import { UpdatePlaceDto } from '../dto/update-place.dto';
 import { FilterPlacesDto } from '../dto/filter-places.dto';
 import { PlaceResponseDto } from '../dto/place-response.dto';
@@ -39,6 +40,68 @@ export class PlacesService {
     const place = this.placeRepository.create(createPlaceDto);
     const savedPlace = await this.placeRepository.save(place);
     return new PlaceResponseDto(savedPlace);
+  }
+
+  async createBulk(createPlacesBulkDto: CreatePlacesBulkDto): Promise<any> {
+    const { places } = createPlacesBulkDto;
+    const results: any[] = [];
+    let created = 0;
+    let failed = 0;
+
+    for (const placeDto of places) {
+      try {
+        // Procesar coordenadas si vienen en formato string
+        if (placeDto.coordinates) {
+          const { latitude, longitude } = this.parseCoordinates(placeDto.coordinates);
+          placeDto.latitude = latitude;
+          placeDto.longitude = longitude;
+          delete (placeDto as any).coordinates;
+        }
+
+        // Validar coordenadas
+        if (
+          placeDto.latitude === undefined ||
+          placeDto.longitude === undefined
+        ) {
+          results.push({
+            name: placeDto.name,
+            status: 'failed',
+            error: 'Debe especificar latitude y longitude o el campo coordinates'
+          });
+          failed++;
+          continue;
+        }
+
+        // Crear el lugar
+        const place = this.placeRepository.create(placeDto);
+        const savedPlace = await this.placeRepository.save(place);
+        results.push({
+          id: savedPlace.id,
+          name: savedPlace.name,
+          status: 'created'
+        });
+        created++;
+      } catch (error) {
+        results.push({
+          name: placeDto.name,
+          status: 'failed',
+          error: error.message || 'Error al crear el lugar'
+        });
+        failed++;
+      }
+    }
+
+    return {
+      success: true,
+      statusCode: 201,
+      message: `${created} lugares creados exitosamente, ${failed} fallidos`,
+      data: {
+        created,
+        failed,
+        results
+      },
+      timestamp: new Date().toISOString()
+    };
   }
 
   async findAll(filterDto: FilterPlacesDto): Promise<PaginatedResponseDto<PlaceResponseDto>> {

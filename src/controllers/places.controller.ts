@@ -25,6 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { PlacesService } from '../services/places.service';
 import { CreatePlaceDto } from '../dto/create-place.dto';
+import { CreatePlacesBulkDto } from '../dto/create-places-bulk.dto';
 import { UpdatePlaceDto } from '../dto/update-place.dto';
 import { FilterPlacesDto } from '../dto/filter-places.dto';
 import { PlaceResponseDto } from '../dto/place-response.dto';
@@ -114,6 +115,91 @@ export class PlacesController {
   })
   async create(@Body() createPlaceDto: CreatePlaceDto): Promise<PlaceResponseDto> {
     return this.placesService.create(createPlaceDto);
+  }
+
+  @Post('bulk')
+  @ApiOperation({
+    summary: 'Crear múltiples lugares',
+    description: 'Registra varios puntos de interés en la base de datos en una sola petición',
+  })
+  @ApiBody({
+    type: CreatePlacesBulkDto,
+    description: 'Datos de creación de múltiples lugares',
+    examples: {
+      'Crear 2 lugares': {
+        summary: 'Ejemplo con 2 lugares',
+        value: {
+          places: [
+            {
+              name: 'Café Central',
+              description: 'Un acogedor café en el centro de la ciudad',
+              category: 'cafetería',
+              tags: ['vintage', 'tranquilo'],
+              latitude: -12.046374,
+              longitude: -77.042793,
+              address: 'Av. Larco 123, Miraflores, Lima',
+              imageUrl: 'https://example.com/images/cafe.jpg',
+              isHiddenGem: false
+            },
+            {
+              name: 'Museo de Historia',
+              description: 'Exhibiciones de historia local',
+              category: 'museo',
+              tags: ['educativo', 'familiar'],
+              latitude: -12.045374,
+              longitude: -77.043793,
+              address: 'Av. Principal 456',
+              imageUrl: 'https://example.com/museo.jpg',
+              isHiddenGem: false,
+              openingTime: '09:00',
+              closingTime: '18:00',
+              tourDuration: 90
+            }
+          ]
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Lugares creados exitosamente',
+    content: {
+      'application/json': {
+        example: {
+          success: true,
+          statusCode: 201,
+          message: 'Lugares creados exitosamente',
+          data: {
+            created: 2,
+            failed: 0,
+            results: [
+              {
+                id: '123e4567-e89b-12d3-a456-426614174000',
+                name: 'Café Central',
+                status: 'created'
+              },
+              {
+                id: '223e4567-e89b-12d3-a456-426614174001',
+                name: 'Museo de Historia',
+                status: 'created'
+              }
+            ]
+          },
+          timestamp: '2024-01-15T10:30:00Z'
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos',
+  })
+  @ApiResponse({
+    status: 413,
+    description: 'Demasiados lugares en la petición (máximo 100)',
+  })
+  async createBulk(@Body() createPlacesBulkDto: CreatePlacesBulkDto): Promise<any> {
+    return this.placesService.createBulk(createPlacesBulkDto);
   }
 
   @Get()
