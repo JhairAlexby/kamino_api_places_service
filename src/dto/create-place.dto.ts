@@ -11,6 +11,7 @@ import {
   Max,
   MaxLength,
   Matches,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreatePlaceDto {
@@ -59,10 +60,11 @@ export class CreatePlaceDto {
     minimum: -90,
     maximum: 90,
   })
+  @ValidateIf((o) => o.coordinates === undefined)
   @IsNumber()
   @Min(-90)
   @Max(90)
-  latitude: number;
+  latitude?: number;
 
   @ApiProperty({
     description: 'Longitud del lugar',
@@ -70,10 +72,11 @@ export class CreatePlaceDto {
     minimum: -180,
     maximum: 180,
   })
+  @ValidateIf((o) => o.coordinates === undefined)
   @IsNumber()
   @Min(-180)
   @Max(180)
-  longitude: number;
+  longitude?: number;
 
   @ApiProperty({
     description:
