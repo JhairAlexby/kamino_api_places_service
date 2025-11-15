@@ -59,10 +59,11 @@ export class CreatePlaceDto {
     minimum: -90,
     maximum: 90,
   })
+  @ValidateIf((o) => o.coordinates === undefined)
   @IsNumber()
   @Min(-90)
   @Max(90)
-  latitude: number;
+  latitude?: number;
 
   @ApiProperty({
     description: 'Longitud del lugar',
@@ -70,10 +71,23 @@ export class CreatePlaceDto {
     minimum: -180,
     maximum: 180,
   })
+  @ValidateIf((o) => o.coordinates === undefined)
   @IsNumber()
   @Min(-180)
   @Max(180)
-  longitude: number;
+  longitude?: number;
+
+  @ApiProperty({
+    description:
+      'Coordenadas en formato "latitud, longitud". Alternativa a enviar latitude y longitude por separado',
+    example: '16.614497, -93.091983',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*$/,
+    { message: 'coordinates debe tener el formato "latitud, longitud"' })
+  coordinates?: string;
 
   @ApiProperty({
     description:
