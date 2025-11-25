@@ -89,6 +89,65 @@ export class PlaceResponseDto {
   tourDuration?: number | null;
 
   @ApiProperty({
+    description: 'ID del File Search Store donde está almacenada la narrativa',
+    example: 'fileSearchStores/abc123xyz456',
+    required: false,
+    nullable: true,
+  })
+  narrativeStoreId?: string | null;
+
+  @ApiProperty({
+    description: 'ID del documento de narrativa en Gemini File Search',
+    example: 'fileSearchStores/abc123xyz456/documents/doc789',
+    required: false,
+    nullable: true,
+  })
+  narrativeDocumentId?: string | null;
+
+  @ApiProperty({
+    description: 'Indica si el lugar tiene narrativa asociada',
+    example: true,
+  })
+  hasNarrative: boolean;
+
+  @ApiProperty({
+    description: 'Días en los que el lugar está cerrado',
+    example: ['monday', 'sunday'],
+    required: false,
+    nullable: true
+  })
+  closedDays?: string[] | null;
+
+  @ApiProperty({
+    description: 'Horarios específicos por día',
+    example: {
+      tuesday: { open: '09:30', close: '16:00' },
+      saturday: { open: '10:30', close: '16:00' }
+    },
+    required: false,
+    nullable: true,
+  })
+  scheduleByDay?: Record<string, { open: string; close: string }> | null;
+
+  @ApiProperty({
+    description: 'Información sobre afluencia y horarios óptimos',
+    example: {
+      peakDays: ['saturday', 'sunday'],
+      peakHours: ['11:00-13:00'],
+      bestDays: ['tuesday', 'wednesday', 'thursday'],
+      bestHours: ['09:30-11:00', '14:00-16:00']
+    },
+    required: false,
+    nullable: true,
+  })
+  crowdInfo?: {
+    peakDays?: string[];
+    peakHours?: string[];
+    bestDays?: string[];
+    bestHours?: string[];
+  } | null;
+
+  @ApiProperty({
     description: 'Fecha de creación',
     example: '2024-01-15T10:30:00Z',
   })
@@ -121,10 +180,19 @@ export class PlaceResponseDto {
     this.openingTime = place.openingTime ?? null;
     this.closingTime = place.closingTime ?? null;
     this.tourDuration = place.tourDuration ?? null;
+
+    this.narrativeStoreId = place.narrativeStoreId ?? null;
+    this.narrativeDocumentId = place.narrativeDocumentId ?? null;
+    this.hasNarrative = !!place.narrativeDocumentId;
+
+    this.closedDays = place.closedDays ?? null;
+    this.scheduleByDay = place.scheduleByDay ?? null;
+    this.crowdInfo = place.crowdInfo ?? null;
+
     this.createdAt = place.createdAt;
     this.updatedAt = place.updatedAt;
     if (distance !== undefined) {
-      this.distance = Math.round(distance * 100) / 100; // Redondear a 2 decimales
+      this.distance = Math.round(distance * 100) / 100;
     }
   }
 }
