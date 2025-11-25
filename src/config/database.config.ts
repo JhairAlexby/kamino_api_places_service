@@ -11,12 +11,15 @@ export default registerAs(
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'password',
     database: process.env.DB_NAME || 'kamino_places',
+
     entities: [Place],
-    migrations:
-      process.env.NODE_ENV === 'development'
-        ? ['src/migrations/*.ts']
-        : ['dist/migrations/*.js'],
-    migrationsRun: true,
+
+    // 👇 Solo cargar migraciones compiladas
+    migrations: ['dist/migrations/*.js'],
+
+    // 👇 No ejecutar migraciones al arrancar Nest
+    migrationsRun: false,
+
     synchronize: process.env.NODE_ENV === 'development',
     logging: process.env.NODE_ENV === 'development',
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,

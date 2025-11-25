@@ -60,4 +60,32 @@ export class Place {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @Column({ nullable: true, name: 'narrative_store_id' })
+  narrativeStoreId?: string;
+
+  @Column({ nullable: true, name: 'narrative_document_id' })
+  narrativeDocumentId?: string;
+
+  @Column('simple-array', { nullable: true })
+closedDays?: string[] | null; //["monday","tuesday"]
+
+@Column('jsonb', { nullable: true })
+scheduleByDay?: {
+  monday?: { open: string; close: string };
+  tuesday?: { open: string; close: string };
+  wednesday?: { open: string; close: string };
+  thursday?: { open: string; close: string };
+  friday?: { open: string; close: string };
+  saturday?: { open: string; close: string };
+  sunday?: { open: string; close: string };
+} | null;
+
+@Column('jsonb', { nullable: true })
+crowdInfo?: {
+  peakDays?: string[];      // ["saturday", "sunday"]
+  peakHours?: string[];     // ["11:00-13:00"]
+  bestDays?: string[];      // ["tuesday", "wednesday"]
+  bestHours?: string[];     // ["09:30-11:00", "15:00-16:00"]
+} | null;
 }

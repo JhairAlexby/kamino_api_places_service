@@ -12,6 +12,7 @@ import {
   MaxLength,
   Matches,
   ValidateIf,
+  IsObject 
 } from 'class-validator';
 
 export class CreatePlaceDto {
@@ -146,4 +147,44 @@ export class CreatePlaceDto {
   @IsNumber()
   @Min(1)
   tourDuration?: number;
+  @ApiProperty({
+    description: 'Días en que el lugar está cerrado (en inglés, ex: "monday")',
+    example: ['monday', 'sunday'],
+    required: false
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  closedDays?: string[];
+
+  @ApiProperty({
+    description: 'Horarios específicos por día',
+    example: {
+      tuesday: { open: '09:30', close: '16:00' },
+      wednesday: { open: '09:30', close: '16:00' }
+    },
+    required: false
+  })
+  @IsOptional()
+  @IsObject()
+  scheduleByDay?: Record<string, { open: string; close: string }>;
+
+  @ApiProperty({
+    description: 'Información sobre afluencia óptima',
+    example: {
+      peakDays: ['saturday', 'sunday'],
+      peakHours: ['11:00-13:00'],
+      bestDays: ['tuesday', 'wednesday'],
+      bestHours: ['09:30-11:00', '14:00-16:00']
+    },
+    required: false
+  })
+  @IsOptional()
+  @IsObject()
+  crowdInfo?: {
+    peakDays?: string[];
+    peakHours?: string[];
+    bestDays?: string[];
+    bestHours?: string[];
+  };
 }
