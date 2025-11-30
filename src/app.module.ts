@@ -9,9 +9,11 @@ import databaseConfig from './config/database.config';
 import { ChatModule } from './chat/chat.module';
 import { NarratorModule } from './narrator/narrator.module';
 import { GeminiModule } from './gemini/gemini.module'; 
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig],
