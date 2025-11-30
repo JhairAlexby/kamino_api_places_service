@@ -1,7 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { PlacesService } from '../services/places.service';
 import { FileSearchService } from '../gemini/file-search.service';
 
+@ApiTags('Narrador')
 @Controller('narrator')
 export class NarratorController {
   constructor(
@@ -10,6 +12,26 @@ export class NarratorController {
   ) {}
 
   @Get(':placeId')
+  @ApiOperation({
+    summary: 'Narrador de historias, curiosidades o anécdotas del lugar',
+    description: 'Devuelve una historia breve, anécdota o curiosidad diferente cada vez; invita a seguir la conversación en el chatbot.'
+  })
+  @ApiParam({ name: 'placeId', required: true, description: 'ID único del lugar a narrar', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiResponse({
+    status: 200,
+    description: 'Narrativa cálida y curiosa del lugar',
+    schema: {
+      type: 'object',
+      properties: {
+        text: { type: 'string', example: 'El Museo de la Marimba es el guardián musical de Chiapas desde 1993. Aquí se respira cultura en cada nota.\n\n¿Quieres horarios, precios o más detalles? Pregunta en el chatbot de Kamino.' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Lugar no encontrado o sin narrativa.',
+    schema: { example: { error: 'Lugar no encontrado o sin narrativa.' } }
+  })
   async narrate(@Param('placeId') placeId: string) {
     // 1. Busca el lugar por id
     const place = await this.placesService.findOne(placeId);
@@ -47,7 +69,6 @@ export class NarratorController {
     return { text: `${text}\n\n${invite}` };
   }
 
-  // Regex para limpiar introducciones y muletillas
   private limpiarFraseIntro(text: string): string {
     return text
       .replace(

@@ -45,41 +45,53 @@ export class PlacesController {
   @Post()
   @ApiOperation({
     summary: 'Crear un nuevo lugar',
-    description: 'Registra un nuevo punto de interés en la base de datos',
+    description: 'Registra un nuevo punto de interés en la base de datos con horarios por día y días cerrados',
   })
   @ApiBody({
     type: CreatePlaceDto,
     description: 'Datos de creación del lugar',
     examples: {
-      Basico: {
-        summary: 'Solo campos básicos',
+      Completo: {
+        summary: 'Lugar con horarios por día y días cerrados',
         value: {
-          name: 'Café Central',
-          description: 'Un acogedor café en el centro de la ciudad',
-          category: 'cafetería',
-          tags: ['vintage', 'tranquilo'],
-          latitude: -12.046374,
-          longitude: -77.042793,
-          address: 'Av. Larco 123, Miraflores, Lima',
-          imageUrl: 'https://example.com/images/cafe.jpg',
-          isHiddenGem: false
+          name: 'Museo Regional de Chiapas',
+          description: 'Museo dedicado a la historia y cultura regional con exposiciones permanentes y temporales.',
+          category: 'museo',
+          tags: ['historia', 'cultura', 'educativo', 'familia'],
+          latitude: 16.746079,
+          longitude: -93.112507,
+          address: 'Calzada de los Hombres Ilustres de la Revolución Mexicana s/n, Tuxtla Gutiérrez',
+          imageUrl: 'https://ejemplo.com/imagenes/museo-chiapas.jpg',
+          isHiddenGem: false,
+          tourDuration: 90,
+          closedDays: ['monday'],
+          scheduleByDay: {
+            tuesday: { open: '09:00', close: '17:00' },
+            wednesday: { open: '09:00', close: '17:00' },
+            thursday: { open: '09:00', close: '17:00' },
+            friday: { open: '09:00', close: '17:00' },
+            saturday: { open: '09:00', close: '15:00' },
+            sunday: { open: '09:00', close: '15:00' }
+          },
+          crowdInfo: {
+            peakDays: ['saturday', 'sunday'],
+            peakHours: ['11:00-14:00'],
+            bestDays: ['tuesday', 'wednesday', 'thursday'],
+            bestHours: ['09:00-12:00', '15:00-17:00']
+          }
         }
       },
-      ConHorarioYTour: {
-        summary: 'Incluye horario y duración de tour',
+      Basico: {
+        summary: 'Solo campos básicos obligatorios',
         value: {
-          name: 'Museo de Historia',
-          description: 'Exhibiciones de historia local',
-          category: 'museo',
-          tags: ['educativo', 'familiar'],
-          latitude: -12.046374,
-          longitude: -77.042793,
-          address: 'Av. Principal 123',
-          imageUrl: 'https://example.com/museo.jpg',
-          isHiddenGem: false,
-          openingTime: '09:00',
-          closingTime: '18:00',
-          tourDuration: 90
+          name: 'Parque Central',
+          description: 'Hermoso parque en el corazón de la ciudad, ideal para paseos en familia.',
+          category: 'parque',
+          tags: ['naturaleza', 'familia', 'deporte'],
+          latitude: 16.800000,
+          longitude: -93.100000,
+          address: 'Avenida Central S/N, Col. Centro, Tuxtla Gutiérrez',
+          isHiddenGem: false
         }
       }
     }
@@ -92,18 +104,36 @@ export class PlacesController {
       'application/json': {
         example: {
           id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'Museo de Historia',
-          description: 'Exhibiciones de historia local',
+          name: 'Museo Regional de Chiapas',
+          description: 'Museo dedicado a la historia y cultura regional.',
           category: 'museo',
-          tags: ['educativo', 'familiar'],
-          latitude: -12.046374,
-          longitude: -77.042793,
-          address: 'Av. Principal 123',
-          imageUrl: 'https://example.com/museo.jpg',
+          tags: ['historia', 'cultura', 'educativo', 'familia'],
+          latitude: 16.746079,
+          longitude: -93.112507,
+          address: 'Calzada de los Hombres Ilustres de la Revolución Mexicana s/n, Tuxtla Gutiérrez',
+          imageUrl: 'https://ejemplo.com/imagenes/museo-chiapas.jpg',
           isHiddenGem: false,
-          openingTime: '09:00',
-          closingTime: '18:00',
+          openingTime: null,
+          closingTime: null,
           tourDuration: 90,
+          narrativeStoreId: null,
+          narrativeDocumentId: null,
+          hasNarrative: false,
+          closedDays: ['monday'],
+          scheduleByDay: {
+            tuesday: { open: '09:00', close: '17:00' },
+            wednesday: { open: '09:00', close: '17:00' },
+            thursday: { open: '09:00', close: '17:00' },
+            friday: { open: '09:00', close: '17:00' },
+            saturday: { open: '09:00', close: '15:00' },
+            sunday: { open: '09:00', close: '15:00' }
+          },
+          crowdInfo: {
+            peakDays: ['saturday', 'sunday'],
+            peakHours: ['11:00-14:00'],
+            bestDays: ['tuesday', 'wednesday', 'thursday'],
+            bestHours: ['09:00-12:00', '15:00-17:00']
+          },
           createdAt: '2024-01-15T10:30:00Z',
           updatedAt: '2024-01-15T10:30:00Z'
         }
@@ -117,6 +147,7 @@ export class PlacesController {
   async create(@Body() createPlaceDto: CreatePlaceDto): Promise<PlaceResponseDto> {
     return this.placesService.create(createPlaceDto);
   }
+  
 
   @Post('bulk')
   @ApiOperation({
@@ -554,4 +585,5 @@ export class PlacesController {
     }
     return this.placesService.completeDeleteAll();
   }
+  
 }
