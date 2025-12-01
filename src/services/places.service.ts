@@ -4,14 +4,13 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Place } from '../entities/place.entity';
 import { CreatePlaceDto } from '../dto/create-place.dto';
 import { CreatePlacesBulkDto } from '../dto/create-places-bulk.dto';
 import { UpdatePlaceDto } from '../dto/update-place.dto';
 import { FilterPlacesDto } from '../dto/filter-places.dto';
 import { PlaceResponseDto } from '../dto/place-response.dto';
-import { PaginatedResponseDto, PaginationMetaDto } from '../dto/paginated-response.dto';
 import { NearbySearchDto } from '../dto/nearby-search.dto';
 import { DeleteResponseDto } from '../dto/delete-response.dto';
 
@@ -104,7 +103,7 @@ export class PlacesService {
     };
   }
 
-  async findAll(filterDto: FilterPlacesDto): Promise<PaginatedResponseDto<PlaceResponseDto>> {
+  async findAll(filterDto: FilterPlacesDto): Promise<PlaceResponseDto[]> {
     const {
       search,
       category,
@@ -115,8 +114,6 @@ export class PlacesService {
       isHiddenGem,
       sortBy = 'createdAt',
       sortOrder = 'DESC',
-      page = 1,
-      limit = 10,
     } = filterDto;
 
     const queryBuilder = this.placeRepository.createQueryBuilder('place');
@@ -176,12 +173,8 @@ export class PlacesService {
       queryBuilder.orderBy(`place.${sortField}`, sortOrder);
     }
 
-    // Paginación
-    const offset = (page - 1) * limit;
-    queryBuilder.skip(offset).take(limit);
-
-    // Ejecutar consulta
-    const [places, total] = await queryBuilder.getManyAndCount();
+    // Ejecutar consulta SIN paginación
+    const places = await queryBuilder.getMany();
 
     // Procesar resultados
     const placesWithDistance = await Promise.all(
@@ -199,18 +192,7 @@ export class PlacesService {
       })
     );
 
-    // Metadatos de paginación
-    const totalPages = Math.ceil(total / limit);
-    const meta: PaginationMetaDto = {
-      page,
-      limit,
-      total,
-      totalPages,
-      hasPrevious: page > 1,
-      hasNext: page < totalPages,
-    };
-
-    return new PaginatedResponseDto(placesWithDistance, meta);
+    return placesWithDistance;
   }
 
   async findOne(id: string): Promise<PlaceResponseDto> {

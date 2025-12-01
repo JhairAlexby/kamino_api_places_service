@@ -30,14 +30,12 @@ import { CreatePlacesBulkDto } from '../dto/create-places-bulk.dto';
 import { UpdatePlaceDto } from '../dto/update-place.dto';
 import { FilterPlacesDto } from '../dto/filter-places.dto';
 import { PlaceResponseDto } from '../dto/place-response.dto';
-import { PaginatedResponseDto } from '../dto/paginated-response.dto';
 import { NearbySearchDto } from '../dto/nearby-search.dto';
 import { DeleteResponseDto } from '../dto/delete-response.dto';
 
 @ApiTags('Places')
 @Controller('places')
 @UsePipes(new ValidationPipe({ transform: true }))
-// En la clase PlacesController
 @ApiExtraModels(DeleteResponseDto)
 export class PlacesController {
   constructor(private readonly placesService: PlacesService) {}
@@ -147,7 +145,6 @@ export class PlacesController {
   async create(@Body() createPlaceDto: CreatePlaceDto): Promise<PlaceResponseDto> {
     return this.placesService.create(createPlaceDto);
   }
-  
 
   @Post('bulk')
   @ApiOperation({
@@ -237,7 +234,7 @@ export class PlacesController {
   @Get()
   @ApiOperation({
     summary: 'Obtener lugares con filtros',
-    description: 'Busca y filtra lugares según diversos criterios con paginación',
+    description: 'Busca y filtra lugares según diversos criterios SIN paginación',
   })
   @ApiQuery({ name: 'search', required: false, description: 'Búsqueda por nombre' })
   @ApiQuery({ name: 'category', required: false, description: 'Filtrar por categoría' })
@@ -248,47 +245,35 @@ export class PlacesController {
   @ApiQuery({ name: 'isHiddenGem', required: false, description: 'Filtrar solo joyas ocultas' })
   @ApiQuery({ name: 'sortBy', required: false, description: 'Campo de ordenamiento' })
   @ApiQuery({ name: 'sortOrder', required: false, description: 'Orden (ASC/DESC)' })
-  @ApiQuery({ name: 'page', required: false, description: 'Número de página' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Elementos por página' })
   @ApiResponse({
     status: 200,
     description: 'Lista de lugares obtenida exitosamente',
-    type: PaginatedResponseDto,
+    type: [PlaceResponseDto],
     content: {
       'application/json': {
-        example: {
-          data: [
-            {
-              id: '11111111-1111-1111-1111-111111111111',
-              name: 'Café Central',
-              description: 'Un acogedor café en el centro de la ciudad',
-              category: 'cafetería',
-              tags: ['vintage', 'tranquilo'],
-              latitude: -12.046374,
-              longitude: -77.042793,
-              address: 'Av. Larco 123, Miraflores, Lima',
-              imageUrl: 'https://example.com/images/cafe.jpg',
-              isHiddenGem: false,
-              openingTime: '08:30',
-              closingTime: '21:00',
-              tourDuration: 60,
-              createdAt: '2024-01-15T10:30:00Z',
-              updatedAt: '2024-01-15T10:30:00Z'
-            }
-          ],
-          meta: {
-            page: 1,
-            limit: 10,
-            total: 1,
-            totalPages: 1,
-            hasPrevious: false,
-            hasNext: false
+        example: [
+          {
+            id: '11111111-1111-1111-1111-111111111111',
+            name: 'Café Central',
+            description: 'Un acogedor café en el centro de la ciudad',
+            category: 'cafetería',
+            tags: ['vintage', 'tranquilo'],
+            latitude: -12.046374,
+            longitude: -77.042793,
+            address: 'Av. Larco 123, Miraflores, Lima',
+            imageUrl: 'https://example.com/images/cafe.jpg',
+            isHiddenGem: false,
+            openingTime: '08:30',
+            closingTime: '21:00',
+            tourDuration: 60,
+            createdAt: '2024-01-15T10:30:00Z',
+            updatedAt: '2024-01-15T10:30:00Z'
           }
-        }
+        ]
       }
     }
   })
-  async findAll(@Query() filterDto: FilterPlacesDto): Promise<PaginatedResponseDto<PlaceResponseDto>> {
+  async findAll(@Query() filterDto: FilterPlacesDto): Promise<PlaceResponseDto[]> {
     return this.placesService.findAll(filterDto);
   }
 
@@ -298,7 +283,7 @@ export class PlacesController {
     summary: 'Buscar lugares cercanos',
     description: 'Encuentra lugares cercanos a coordenadas específicas usando datos JSON',
   })
-  @ApiBody({ 
+  @ApiBody({
     type: NearbySearchDto,
     description: 'Datos de búsqueda de lugares cercanos',
     examples: {
@@ -521,7 +506,6 @@ export class PlacesController {
     return this.placesService.toggleHiddenGem(id);
   }
 
-  // Dentro de PlacesController.remove()
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -585,5 +569,4 @@ export class PlacesController {
     }
     return this.placesService.completeDeleteAll();
   }
-  
 }
