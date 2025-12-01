@@ -124,30 +124,4 @@ export class FilterPlacesDto {
   @IsString()
   @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC';
-
-  @ApiProperty({
-    description: 'Número de página para paginación',
-    example: 1,
-    required: false,
-    minimum: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(1)
-  page?: number = 1;
-
-  @ApiProperty({
-    description: 'Número de elementos por página',
-    example: 10,
-    required: false,
-    minimum: 1,
-    maximum: 100,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(1)
-  @Max(100)
-  limit?: number = 10;
 }

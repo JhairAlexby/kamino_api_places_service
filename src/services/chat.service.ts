@@ -35,8 +35,7 @@ export class ChatService {
       'sugerencia', 'qué visitar', 'lugares para conocer'
     ];
     if (RECOMMEND_WORDS.some(w => msgLimpio.includes(w))) {
-      const allPlacesPaginated = await this.placesService.findAll({});
-      const allPlaces: PlaceResponseDto[] = allPlacesPaginated.data;
+      const allPlaces: PlaceResponseDto[] = await this.placesService.findAll({});
       // Filtra que no sea el lugar en contexto
       const suggestions = allPlaces
         .filter(p => !this.lastPlace || p.id !== this.lastPlace.id)
@@ -154,8 +153,7 @@ export class ChatService {
   }
 
   async findPlaceInMessage(message: string): Promise<PlaceResponseDto | null> {
-    const allPlacesPaginated = await this.placesService.findAll({});
-    const allPlaces: PlaceResponseDto[] = allPlacesPaginated.data;
+    const allPlaces: PlaceResponseDto[] = await this.placesService.findAll({});
     const msgLimpio = this.limpiarTexto(message);
 
     let mejorPlace: PlaceResponseDto | null = null;
