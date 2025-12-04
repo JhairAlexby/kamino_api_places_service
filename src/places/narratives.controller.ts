@@ -8,6 +8,7 @@ import {
   UploadedFile,
   NotFoundException,
   BadRequestException,
+  ForbiddenException
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -175,4 +176,25 @@ export class NarrativesController {
       message: 'Narrativa eliminada exitosamente',
     };
   }
+  @Post('refresh-all-pdfs')
+async refreshAllPdfs() {
+  // Solo permitir en desarrollo
+  if (process.env.NODE_ENV === 'production') {
+    throw new ForbiddenException('Operación no permitida en producción');
+  }
+  
+  const { PdfMaintenanceService } = await import('../services/pdf-maintenance.service.js');
+  const maintenanceService = new PdfMaintenanceService(
+    this.placesService['placeRepository'],
+    this.fileSearchService
+  );
+  
+  await maintenanceService.refreshExpiredPdfs();
+  
+  return {
+    success: true,
+    message: 'PDFs actualizados'
+  };
+}
+
 }
